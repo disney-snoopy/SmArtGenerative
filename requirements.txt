@@ -36,3 +36,4 @@ memoized-property
 termcolor
 jupyter
 tqdm
+iamgeio
