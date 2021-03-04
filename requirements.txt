@@ -31,6 +31,5 @@ six>=1.14
 joblib
 memoized-property
 termcolor
-PIL
-python-dotenv
+python-dotengsv
 copy
