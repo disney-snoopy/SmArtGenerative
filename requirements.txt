@@ -4,6 +4,9 @@ setuptools>=26
 twine
 wheel>=0.29
 
+# visualisation
+matplotlib
+
 # data science
 numpy
 pandas
@@ -31,5 +34,4 @@ six>=1.14
 joblib
 memoized-property
 termcolor
-python-dotengsv
-copy
+jupyter

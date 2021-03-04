@@ -5,14 +5,14 @@ import torchvision.transforms as T
 
 
 def loader(path):
-'''Convert PIL image into torch tensor with dummy dimension'''
+  '''Convert PIL image into torch tensor with dummy dimension'''
   preproc = T.Compose([T.ToTensor()])
   img = Image.open(path)
   img_proc = preproc(img).unsqueeze(0)
   return img_proc
 
 def unloader(img):
-'''convert torch tensor into PIL image'''
+  '''convert torch tensor into PIL image'''
   t_unload = T.ToPILImage()
   img = t_unload(img)
   return img

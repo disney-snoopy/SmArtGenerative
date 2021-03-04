@@ -3,10 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+from SmArtGenerative.utils import *
+
 
 class ContentLoss(nn.Module):
-
-    def __init__(self, target,):
+    def __init__(self, target):
         super(ContentLoss, self).__init__()
         # we 'detach' the target content from the tree used
         # to dynamically compute the gradient: this is a stated value,
@@ -19,7 +20,6 @@ class ContentLoss(nn.Module):
         return input
 
 class StyleLoss(nn.Module):
-
     def __init__(self, target_feature):
         super(StyleLoss, self).__init__()
         self.target = gram_matrix(target_feature).detach()
