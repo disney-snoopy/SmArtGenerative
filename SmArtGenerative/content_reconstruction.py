@@ -16,9 +16,9 @@ from SmArtGenerative.layers import *
 
 class Content_Reconstructor(nn.Module):
     #Extract__nn class returns the feature maps of the first 5 conv layers of vgg16.
-    def __init__(self):
+    def __init__(self, model_path):
         super(Content_Reconstructor, self).__init__()
-        vgg16 = models.vgg16(pretrained=True).features.eval().to(device)
+        vgg16 = torch.load(model_path).features.eval().to(device)
         self.layers = list(vgg16.children())
         del vgg16
         self.conv1 = self.layers[0]
