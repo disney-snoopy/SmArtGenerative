@@ -35,6 +35,7 @@ class TrainerSegmentation():
         self.crop_content, self.crop_style = self.seg.crop_obj(stylised_image = self.forward_final)
 
     def content_reconstruction(self, epochs = 300, output_freq = 15, lr = 0.001):
+
         # instantiating from saved model
         self.cont_recon = Content_Reconstructor(model_path = self.path_vgg)
         # extract feature map from cropped original image
