@@ -79,5 +79,5 @@ class Content_Reconstructor(nn.Module):
                 self.output_imgs.append(img_start.detach().cpu().data.clamp_(0,1))
             if verbose == 1:
                 if epoch % 20 == 0:
-                    print(f'Epoch {epoch}, Loss: {loss}')
+                                    print(f'Epoch {epoch}, Loss: {loss}')
         self.output_imgs.append(img_start.detach().cpu().data.clamp_(0,1))
