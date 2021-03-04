@@ -15,6 +15,7 @@ scikit-learn
 # deep learning frameworks
 torch
 torchvision
+tensorflow
 
 # tests/linter
 black
@@ -35,3 +36,4 @@ joblib
 memoized-property
 termcolor
 jupyter
+tqdm
