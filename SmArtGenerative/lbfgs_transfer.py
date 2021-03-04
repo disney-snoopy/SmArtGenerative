@@ -15,7 +15,8 @@ from SmArtGenerative.params import *
 from SmArtGenerative.layers import *
 
 class LBFGS_Transfer():
-    def __init__(self, content_layers=['conv_4'], style_layers=['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']):
+    def __init__(self, model_path = None, content_layers=['conv_4'], style_layers=['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']):
+        self.model_path = model_path
         self.content_layers = content_layers
         self.style_layers = style_layers
 
@@ -92,12 +93,14 @@ class LBFGS_Transfer():
 
 
     def run_style_transfer(self, content_img, style_img, input_img, content_layers, style_layers,
-                       cnn=None, normalization_mean=vgg_normalization_mean, normalization_std=vgg_normalization_std,
-                       num_steps=300,style_weight=1000000, content_weight=1, output_freq = 50, verbose = 1):
+                           normalization_mean=vgg_normalization_mean, normalization_std=vgg_normalization_std,
+                           num_steps=300,style_weight=1000000, content_weight=1, output_freq = 50, verbose = 1):
         output_imgs = []
         epoch_nums = []
-        if cnn == None:
-            cnn = models.vgg19(pretrained=True).features.to(device).eval()
+        if self.model_path == None:
+            cnn = models.vgg16(pretrained=True).features.eval().to(device)
+        else:
+            cnn = torch.load(self.model_path).features.eval().to(device)
 
         print('Building the style transfer model..')
         model, style_losses, content_losses = self.get_style_model_and_losses(cnn,normalization_mean,
@@ -149,8 +152,6 @@ class LBFGS_Transfer():
 
         return output_imgs, epoch_nums
 
-
-
     def learn(self, content_img, style_img, input_img, num_steps=300, style_weight=1e6, content_weight=1, epochs = 200, output_freq = 20):
         self.img_content = T.ToPILImage()(content_img.squeeze())
         self.img_style = T.ToPILImage()(style_img.squeeze())
@@ -163,8 +164,9 @@ class LBFGS_Transfer():
         style_img = style_transform(self.img_style).unsqueeze(0).to(device, torch.float)
 
         self.output_imgs, self.epoch_nums = self.run_style_transfer(content_img, style_img, input_img, self.content_layers, self.style_layers,
-                                                                cnn=None, normalization_mean=vgg_normalization_mean, normalization_std=vgg_normalization_std,
-                                                                num_steps=epochs,style_weight=style_weight, content_weight=1, output_freq = output_freq)
+                                                                    normalization_mean=vgg_normalization_mean, normalization_std=vgg_normalization_std,
+                                                                    num_steps=epochs,style_weight=style_weight, content_weight=1,
+                                                                    output_freq = output_freq)
 
     def plot_output(self, img_per_row = 3):
         num_outputs = len(self.output_imgs)
@@ -207,8 +209,9 @@ class LBFGS_Transfer():
         for style_weight in self.style_weights:
             inp_img = input_img.clone()
             output_img, epoch_nums = self.run_style_transfer(content_img, style_img, inp_img, self.content_layers, self.style_layers,
-                                                                    cnn=None, normalization_mean=vgg_normalization_mean, normalization_std=vgg_normalization_std,
-                                                                    num_steps=num_steps,style_weight=style_weight, content_weight=1, output_freq = num_steps, verbose = 0)
+                                                            normalization_mean=vgg_normalization_mean, normalization_std=vgg_normalization_std,
+                                                            num_steps=num_steps,style_weight=style_weight, content_weight=1, output_freq = num_steps, verbose = 0,
+                                                            model_path = self.model_path)
             self.output_imgs.append(output_img)
         #Plotting input images
         fig, axs = plt.subplots(1, 2, figsize = (16, 6), sharey=True, sharex=True)
