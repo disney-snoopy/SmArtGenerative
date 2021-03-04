@@ -12,6 +12,7 @@ scikit-learn
 # deep learning frameworks
 torch
 torchvision
+tensorflow
 
 # tests/linter
 black
@@ -33,3 +34,4 @@ memoized-property
 termcolor
 python-dotengsv
 copy
+tqdm
