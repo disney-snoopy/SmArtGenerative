@@ -15,7 +15,7 @@ def unloader(img):
   '''convert torch tensor into PIL image'''
   t_unload = T.ToPILImage()
   img = t_unload(img)
-  return img
+  return img.squeeze()
 
 def gram_matrix(input_tensor):
     # a=batch size(=1)
