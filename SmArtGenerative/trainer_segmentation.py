@@ -34,13 +34,16 @@ class TrainerSegmentation():
         self.seg.run_segmentation(unloader(self.tensor_content))
         self.crop_content, self.crop_style = self.seg.crop_obj(stylised_image = self.forward_final)
 
-    def content_reconstruction(self):
+    def content_reconstruction(self, epochs = 300, output_freq = 15, lr = 0.001):
         # instantiating from saved model
         self.cont_recon = Content_Reconstructor(model_path = self.path_vgg)
         # extract feature map from cropped original image
         self.cont_recon(self.crop_content)
         # content reconstruction
-        self.cont_recon.restore(tensor_stylised = self.crop_style, epochs = 300, output_freq = 50, lr = 0.00015)
+        self.cont_recon.restore(tensor_stylised = self.crop_style,
+                                epochs = epochs,
+                                output_freq = output_freq,
+                                lr = lr)
 
     def patch(self):
         # patch cropped reconstructed image on stylised image using binary mask
