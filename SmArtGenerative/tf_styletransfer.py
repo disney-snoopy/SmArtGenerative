@@ -8,6 +8,7 @@ import matplotlib as mpl
 import numpy as np
 import PIL.Image
 import time
+from tqdm import tqdm
 
 from SmArtGenerative.image_utils import *
 
