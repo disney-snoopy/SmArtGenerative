@@ -18,12 +18,15 @@ class Content_Reconstructor(nn.Module):
     #Extract__nn class returns the feature maps of the first 5 conv layers of vgg16.
     def __init__(self):
         super(Content_Reconstructor, self).__init__()
-        self.conv1 = layers[0]
-        self.conv2 = layers[2]
-        self.conv3 = layers[5]
-        self.conv4 = layers[7]
-        self.conv5 = layers[10]
-        self.maxpool = layers[4]
+        vgg16 = models.vgg16(pretrained=True).features.eval().to(device)
+        self.layers = list(vgg16.children())
+        del vgg16
+        self.conv1 = self.layers[0]
+        self.conv2 = self.layers[2]
+        self.conv3 = self.layers[5]
+        self.conv4 = self.layers[7]
+        self.conv5 = self.layers[10]
+        self.maxpool = self.layers[4]
 
     def forward(self, x):
         '''Input is torch tensor with dummy dimension'''
@@ -44,15 +47,12 @@ class Content_Reconstructor(nn.Module):
 
     def model_construct(self, layer_count=9):
         '''Construct minimal model for content reconstruction'''
-        vgg16 = models.vgg16(pretrained=True).features.eval()
-        layers = list(vgg16.children())
-        del vgg16
         model = nn.Sequential()
         counter = 0
         for i in range(layer_count):
             layer_name = f'layer_{counter}'
             counter += 1
-            model.add_module(layer_name, layers[i])
+            model.add_module(layer_name, self.layers[i])
         return model
 
     def restore(self, tensor_stylised, epochs, output_freq, lr = 0.0002, verbose=0):
@@ -79,5 +79,5 @@ class Content_Reconstructor(nn.Module):
                 self.output_imgs.append(img_start.detach().cpu().data.clamp_(0,1))
             if verbose == 1:
                 if epoch % 20 == 0:
-                                    print(f'Epoch {epoch}, Loss: {loss}')
+                    print(f'Epoch {epoch}, Loss: {loss}')
         self.output_imgs.append(img_start.detach().cpu().data.clamp_(0,1))
