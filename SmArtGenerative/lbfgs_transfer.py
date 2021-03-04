@@ -95,7 +95,7 @@ class LBFGS_Transfer():
     def run_style_transfer(self, content_img, style_img, input_img, content_layers, style_layers,
                            normalization_mean=vgg_normalization_mean, normalization_std=vgg_normalization_std,
                            num_steps=300,style_weight=1000000, content_weight=1, output_freq = 50, verbose = 1):
-        output_imgs = []
+        output_imgs = [content_img]
         epoch_nums = []
         if self.model_path == None:
             cnn = models.vgg16(pretrained=True).features.eval().to(device)
