@@ -11,11 +11,11 @@ def loader(path):
   img_proc = preproc(img).unsqueeze(0)
   return img_proc
 
-def unloader(img):
+def unloader(tensor_img):
   '''convert torch tensor into PIL image'''
   t_unload = T.ToPILImage()
-  img = t_unload(img)
-  return img.squeeze()
+  img = t_unload(tensor_img.squeeze())
+  return img
 
 def gram_matrix(input_tensor):
     # a=batch size(=1)
