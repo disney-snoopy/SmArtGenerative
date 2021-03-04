@@ -2,6 +2,8 @@ import os
 import numpy as np
 import PIL.Image
 import matplotlib.pyplot as plt
+import tensorflow as tf
+from tf.keras.preprocessing.image import img_to_array
 
 def tensor_to_image(tensor):
   '''Converts output tensor back to an image'''
@@ -18,6 +20,21 @@ def load_img(path_to_img):
   img = tf.io.read_file(path_to_img)
   img = tf.image.decode_image(img, channels=3)
   img = tf.image.convert_image_dtype(img, tf.float32)
+
+  shape = tf.cast(tf.shape(img)[:-1], tf.float32)
+  long_dim = max(shape)
+  scale = max_dim / long_dim
+
+  new_shape = tf.cast(shape * scale, tf.int32)
+
+  img = tf.image.resize(img, new_shape)
+  img = img[tf.newaxis, :]
+  return img
+
+def load_uploaded_image(image):
+  max_dim = 512
+  img = PIL.Image.open(image)
+  img = tf.convert_to_tensor(img_to_array(img)/255)
 
   shape = tf.cast(tf.shape(img)[:-1], tf.float32)
   long_dim = max(shape)
