@@ -4,11 +4,9 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as T
 from SmArtGenerative.utils import loader, unloader
 from SmArtGenerative.trainer_segmentation import TrainerSegmentation
+from SmArtGenerative.params import vgg_model_path, segmentation_model_path
 
 
-# pretrained model paths
-vgg_model_path = '/home/byungjae/code/disney-snoopy/SmArtGenerative/pretrained_models/vgg16_pretrained'
-seg_model_path = '/home/byungjae/code/disney-snoopy/SmArtGenerative/pretrained_models/torch_segmentation_finetuned'
 
 # streamlit setting
 st.set_option('deprecation.showfileUploaderEncoding', False)
@@ -45,7 +43,7 @@ if content_up is not None and style_up is not None:
     trainer = TrainerSegmentation(tensor_content=tensor_content_resized,
                                   tensor_style=tensor_style,
                                   path_vgg=vgg_model_path,
-                                  path_seg=seg_model_path)
+                                  path_seg=segmentation_model_path)
     trainer.stylise(style_weight = 1e11, epochs = 50, output_freq = 50)
     forward_final = trainer.forward_final
     st.image(forward_final, caption = 'Style Transfer Complete', use_column_width=True)

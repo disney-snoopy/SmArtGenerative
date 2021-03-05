@@ -96,9 +96,11 @@ class Segmentation():
           if score > threshold:
             axs[ax].imshow(mask.detach().cpu()[0], cmap = 'gray')
             axs[ax].imshow(self.content_image_PIL, alpha = 0.4)
-            axs[ax].set_title('score: %.3f' %score)
+            #axs[ax].set_title('score: %.3f' %score)
+            axs[ax].set_xticks([])
+            axs[ax].set_yticks([])
             ax += 1
-        fig.suptitle(f'Threshold: {threshold}')
+        #fig.suptitle(f'Threshold: {threshold}')
         return fig
 
     def patch(self, restored_obj_list, mask_threshold = 4e-1):
