@@ -14,11 +14,17 @@ from SmArtGenerative.utils import *
 from SmArtGenerative.params import *
 from SmArtGenerative.layers import *
 
+if torch.cuda.is_available():
+    map_location=lambda storage, loc: storage.cuda()
+else:
+    map_location='cpu'
+
+
 class Segmentation():
     def __init__(self, model_path):
         # pretrained model path is required
         self.model_path = model_path
-        self.model = torch.load(self.model_path).eval()
+        self.model = torch.load(self.model_path, map_location=map_location).eval()
 
     def img_transform(self, img):
         '''converts PIL image into torch vector with dummy dimension'''
@@ -93,6 +99,7 @@ class Segmentation():
             axs[ax].set_title('score: %.3f' %score)
             ax += 1
         fig.suptitle(f'Threshold: {threshold}')
+        return fig
 
     def patch(self, restored_obj_list, mask_threshold = 4e-1):
         self.output_recon = []

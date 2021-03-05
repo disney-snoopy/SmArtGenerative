@@ -37,3 +37,4 @@ termcolor
 jupyter
 tqdm
 imageio
+streamlit

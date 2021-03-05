@@ -6,11 +6,9 @@ from SmArtGenerative.segmentation import Segmentation
 from SmArtGenerative.content_reconstruction import Content_Reconstructor
 
 class TrainerSegmentation():
-    def __init__(self, path_content, path_style, path_vgg = vgg_model_path, path_seg = segmentation_model_path):
-        self.path_content = path_content
-        self.path_style = path_style
-        self.tensor_content = loader(path_content).to(device)
-        self.tensor_style = loader(path_style).to(device)
+    def __init__(self, tensor_content, tensor_style, path_vgg = vgg_model_path, path_seg = segmentation_model_path):
+        self.tensor_content = tensor_content.to(device)
+        self.tensor_style = tensor_style.to(device)
         self.path_vgg = path_vgg
         self.path_seg = path_seg
 
