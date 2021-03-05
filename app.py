@@ -5,8 +5,10 @@ import torchvision.transforms as T
 from SmArtGenerative.utils import loader, unloader
 from SmArtGenerative.trainer_segmentation import TrainerSegmentation
 from SmArtGenerative.params import vgg_model_path, segmentation_model_path
-
-
+from SmArtGenerative.image_utils import load_uploaded_image, load_img, tensor_to_image
+from SmArtGenerative.transfer_functions import multiple_styles
+from SmArtGenerative.tf_styletransfer import Transfer
+import streamlit.components.v1 as components
 
 # streamlit setting
 st.set_option('deprecation.showfileUploaderEncoding', False)
@@ -19,59 +21,43 @@ st.write("")
 forward_final = None
 fig = None
 
-# image upload widget
-content_up = st.file_uploader("Upload your picture for style transfer", type=['png', 'jpg', 'jpeg'])
-style_up = st.file_uploader("Upload your favourite style picture", type=['png', 'jpg', 'jpeg'])
+
+##### OMER UPLOAD OPTIONS #########
+
+content_up = st.file_uploader("Upload an image:", type=['png', 'jpg', 'jpeg'])
 
 if content_up is not None:
-    image_content = Image.open(content_up)
-    tensor_content_resized = T.ToTensor()(image_content).unsqueeze(0)
-    tensor_content_resized = T.functional.resize(tensor_content_resized,
-                                                [int(tensor_content_resized.shape[-2]/2), int(tensor_content_resized.shape[-1]/2)])
-    image_resized = unloader(tensor_content_resized)
-    st.image(image_resized, caption='Image to Stylise.', use_column_width=True)
-    st.write("")
 
-if style_up is not None:
-    image_style = Image.open(style_up)
-    tensor_style = loader(style_up)
-    st.image(image_style, caption='Your Style Image.', use_column_width=True)
-    st.write("")
+    content_img = load_uploaded_image(content_up)
 
-if content_up is not None and style_up is not None:
-    st.write('Style transfer in progress!')
-    trainer = TrainerSegmentation(tensor_content=tensor_content_resized,
-                                  tensor_style=tensor_style,
-                                  path_vgg=vgg_model_path,
-                                  path_seg=segmentation_model_path)
-    trainer.stylise(style_weight = 1e11, epochs = 50, output_freq = 50)
-    forward_final = trainer.forward_final
-    st.image(forward_final, caption = 'Style Transfer Complete', use_column_width=True)
+    options = ['I want to upload my own style image',
+                'Choose a style from the gallery',
+                'Surprise me!']
 
-if forward_final is not None:
-    trainer.segmentation()
-    fig = trainer.seg.plot_box_ind()
-    st.pyplot(fig, caption = 'Human object in your picture!', use_column_width = True)
+    option = st.selectbox('Pick a style option', options)
+    if option == 'I want to upload my own style image':
+        style_up = st.file_uploader("Upload the image to transfer style from", type=['png', 'jpg', 'jpeg'])
 
-if fig is not None:
-    trainer.content_reconstruction(lr = 0.0005, epochs = 50)
-    trainer.patch()
-    reverse_final = trainer.reverse_final
-    st.image(reverse_final, caption = 'Your contour restored', use_column_width=True)
+        if style_up is not None:
+            style_img = load_uploaded_image(style_up)
 
+            weights = st.radio('Preference', ('Style Heavy', 'Balanced', 'Content Heavy'))
 
+            model = Transfer(content_img, style_img, n_epochs=1)
+            model.transfer()
+            img = tensor_to_image(model.image)
+            st.image(img, 'Voila')
 
+    if option == 'Choose a style from the gallery':
 
+        pics = [x for x in range(1,21)]
+        st.write('You can pick from the following styles:')
+        st.image('https://storage.googleapis.com/smartgenerative/style/style-gallery.png')
+        st.image('https://storage.googleapis.com/smartgenerative/style/style-gallery-2.png')
+        option = st.selectbox('Which style would you like', pics)
 
+    if option == 'Surprise me!':
+        pass
 
+##### OMER UPLOAD OPTIONS #########
 
-
-
-
-
-
-#    labels = predict(content_up)
-#
- #   # print out the top 5 prediction labels with scores
-  #  for i in labels:
-   #     st.write("Prediction (index, name)", i[0], ",   Score: ", i[1])
