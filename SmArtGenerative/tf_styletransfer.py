@@ -58,10 +58,10 @@ class StyleContentModel(tf.keras.models.Model):
 
 class Transfer():
 
-  def __init__(self, content_img_path, style_img_path, **kwargs):
+  def __init__(self, content_img, style_img, **kwargs):
     #Load Content
-    self.content_image = load_img(content_img_path)
-    self.style_image = load_img(style_img_path)
+    self.content_image = content_img
+    self.style_image = style_img
 
     self.kwargs = kwargs
 
