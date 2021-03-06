@@ -30,16 +30,18 @@ class TrainerSegmentation():
         # runs segmentation and returns cropped images
         self.seg = Segmentation(model_path = self.path_seg)
         self.seg.run_segmentation(unloader(self.tensor_content))
-        self.crop_content, self.crop_style = self.seg.crop_obj(stylised_image = self.forward_final)
+
+    def seg_crop(self, object_idx):
+        self.crop_content, self.crop_style = self.seg.crop_obj(stylised_image = self.forward_final, object_idx = object_idx)
 
     def content_reconstruction(self, epochs = 300, output_freq = 15, lr = 0.001):
 
         # instantiating from saved model
         self.cont_recon = Content_Reconstructor(model_path = self.path_vgg)
         # extract feature map from cropped original image
-        self.cont_recon(self.crop_content)
+        self.cont_recon.forward(self.crop_content)
         # content reconstruction
-        self.cont_recon.restore(tensor_stylised = self.crop_style,
+        self.cont_recon.restore(crop_stylised_list = self.crop_style,
                                 epochs = epochs,
                                 output_freq = output_freq,
                                 lr = lr)
