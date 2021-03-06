@@ -26,8 +26,8 @@ num_epoch = st.sidebar.slider(label = 'Number of iterations',
                               value = 300,
                               step = 50)
 
-check_segmentation = False
-if st.sidebar.checkbox('Restore people resolution'):
+check_segmentation = True
+if st.sidebar.checkbox('Restore people resolution', value = True):
     check_segmentation = True
 
 restoration_epoch = st.sidebar.slider(label = 'Restoration strength',
@@ -43,6 +43,9 @@ if st.sidebar.checkbox('Export transformation gif'):
 #dummy variables for if statements
 forward_final = None
 fig = None
+crop_boolean = None
+num_objects = None
+run_restoration = None
 
 
 
@@ -60,34 +63,59 @@ if content_up is not None:
     image_resized = unloader(tensor_content_resized)
     c1.image(image_resized, caption='Image to Stylise.', use_column_width=True)
 
-# SDisplay style image once uploaded
+# Display style image once uploaded
 if style_up is not None:
     image_style = Image.open(style_up)
     tensor_style = loader(style_up)
     c2.image(image_style, caption='Your Style Image.', use_column_width=True)
 
-if content_up is not None and style_up is not None:
-    c3.write('Style transfer in progress!')
+# Once both content and style pictures are uploaded and segmentation check box is true,
+# run segmentation and display potential choices.
+
+@st.cache
+def get_segmentation_result(tensor_content_resized, tensor_style, vgg_model_path, segmentation_model_path):
     trainer = TrainerSegmentation(tensor_content=tensor_content_resized,
                                   tensor_style=tensor_style,
                                   path_vgg=vgg_model_path,
                                   path_seg=segmentation_model_path)
-    if check_gif is True:
-        trainer.stylise(style_weight = (10 ** style_weight), epochs = num_epoch, output_freq = int(num_epochs/20))
-    else:
-        trainer.stylise(style_weight = (10 ** style_weight), epochs = num_epoch, output_freq = num_epoch)
+    trainer.segmentation()
+    return trainer
+
+if content_up is not None and style_up is not None and check_segmentation == True:
+    trainer = get_segmentation_result(tensor_content_resized, tensor_style, vgg_model_path, segmentation_model_path)
+    fig, num_objects = trainer.seg.plot_box_ind(threshold = 0.4)
+    c3.pyplot(fig, caption = 'Human object in your picture!', use_column_width = True)
+
+
+###############################
+# Need to interactively fetch object indices which users want to keep
+# Number of choices given to the user can vary
+
+if num_objects is not None:
+    c3.write(f'We found {num_objects} possible human objects!\n Choose the ones you want to restore in the dropdown menu!')
+    object_idx = st.sidebar.multiselect('Choose the objects numbers you want to maintain', range(num_objects))
+
+if st.sidebar.button('Run Detail Restoration'):
+    # print is visible in server output, not in the page
+    run_restoration = 1
+    c3.write(f'Restoration is in progress!')
+
+###############################
+# once run restoration button is pushed, run restoration
+
+if run_restoration is not None:
+    #if check_gif is True:
+     #   trainer.stylise(style_weight = (10 ** style_weight), epochs = num_epoch, output_freq = int(num_epochs/20))
+    #else:
+    trainer.stylise(style_weight = (10 ** style_weight), epochs = num_epoch, output_freq = num_epoch)
 
     forward_final = trainer.forward_final
 
-    if check_segmentation is False:
-        c3.image(forward_final, caption = 'Style Transfer Complete', use_column_width=True)
+    c3.image(forward_final, caption = 'Style Transfer Complete', use_column_width=True)
 
 if forward_final is not None and check_segmentation == True:
-    trainer.segmentation()
-    fig = trainer.seg.plot_box_ind()
-    c3.pyplot(fig, caption = 'Human object in your picture!', use_column_width = True)
 
-if fig is not None:
+    trainer.seg_crop(object_idx = object_idx)
     trainer.content_reconstruction(lr = 0.0005, epochs = restoration_epoch)
     trainer.patch()
     reverse_final = trainer.reverse_final

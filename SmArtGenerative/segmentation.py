@@ -20,8 +20,13 @@ else:
     map_location='cpu'
 
 
+if torch.cuda.is_available():
+    map_location=lambda storage, loc: storage.cuda()
+else:
+    map_location='cpu'
+
 class Segmentation():
-    def __init__(self, model_path):
+    def __init__(self, model_path = None):
         # pretrained model path is required
         self.model_path = model_path
         self.model = torch.load(self.model_path, map_location=map_location).eval()
@@ -43,9 +48,9 @@ class Segmentation():
         self.pred = self.model(self.content_image_vector_dummy)[0]
         print('Segmentation Complete')
 
-    def crop_obj(self, stylised_image, margin = 30, object_num = 1):
+    def crop_obj(self, stylised_image, margin = 30, object_idx = [0]):
         '''return cropped objects from original content image and stylised image'''
-        self.object_num = object_num
+        self.object_idx = object_idx
         self.stylised_image_PIL = stylised_image
         self.stylised_image_vector_dummy = self.img_transform(self.stylised_image_PIL)
         # assert that both stylised and content images have the same shape
@@ -54,21 +59,25 @@ class Segmentation():
 
         # currently only crops one object.
         # needs to be updated
-        box = self.pred['boxes'][object_num-1]
+        self.crop_content_tensor_list = []
+        self.crop_style_tensor_list = []
+        self.crop_coordinates = []
+        for idx in object_idx:
+          box = self.pred['boxes'][idx]
+          a,b,c,d = box
 
-        a,b,c,d = box
+          # adjust box anchor coordinates using
+          margin = margin
+          x_min = np.clip(int(a)-margin, a_min = 0, a_max = ori_shape[-1])
+          y_min = np.clip(int(b)-margin, a_min = 0, a_max = ori_shape[-2])
+          x_max = np.clip(int(c)+margin, a_min = 0, a_max = ori_shape[-1])
+          y_max = np.clip(int(d)+margin, a_min = 0, a_max = ori_shape[-2])
+          self.crop_coordinates.append((x_min, y_min, x_max, y_max))
 
-        # adjust box anchor coordinates using
-        margin = margin
-        self.x_min = np.clip(int(a)-margin, a_min = 0, a_max = ori_shape[-1])
-        self.y_min = np.clip(int(b)-margin, a_min = 0, a_max = ori_shape[-2])
-        self.x_max = np.clip(int(c)+margin, a_min = 0, a_max = ori_shape[-1])
-        self.y_max = np.clip(int(d)+margin, a_min = 0, a_max = ori_shape[-2])
+          self.crop_content_tensor_list.append(self.content_image_vector_dummy[:,:, y_min:y_max, x_min:x_max])
+          self.crop_style_tensor_list.append(self.stylised_image_vector_dummy[:,:, y_min:y_max, x_min:x_max])
 
-        self.crop_content_tensor = self.content_image_vector_dummy[:,:, self.y_min:self.y_max, self.x_min:self.x_max]
-        self.crop_style_tensor = self.stylised_image_vector_dummy[:,:, self.y_min:self.y_max, self.x_min:self.x_max]
-
-        return self.crop_content_tensor, self.crop_style_tensor
+        return self.crop_content_tensor_list, self.crop_style_tensor_list
 
     def plot_box_ind(self, threshold = 0.7):
         '''Plot segmentation result'''
@@ -84,11 +93,11 @@ class Segmentation():
             plt.scatter(box[0], box[1])
             plt.scatter(box[2], box[3])
             plt.plot([box[0], box[2]], [box[1], box[3]])
-            plt.text(box[0], box[1], s = f'{target_counter+1}', fontsize = 12, color = 'black', backgroundcolor = 'gray', alpha = 0.7)
+            plt.text(box[0], box[1], s = f'{target_counter}', fontsize = 12, color = 'black', backgroundcolor = 'gray', alpha = 0.7)
             target_counter += 1
         # subplots for mask contour
         fig, axs = plt.subplots(int(np.ceil(target_counter/4)), 4,
-                                figsize = (12, 3*(np.ceil(target_counter/4))),
+                                figsize = (12, 2*(np.ceil(target_counter/4))),
                                 sharex = True, sharey = True)
         axs = axs.flatten()
         ax = 0
@@ -96,36 +105,39 @@ class Segmentation():
           if score > threshold:
             axs[ax].imshow(mask.detach().cpu()[0], cmap = 'gray')
             axs[ax].imshow(self.content_image_PIL, alpha = 0.4)
-            #axs[ax].set_title('score: %.3f' %score)
+            axs[ax].set_title('%d - score: %.2f' %(ax, score))
             axs[ax].set_xticks([])
             axs[ax].set_yticks([])
             ax += 1
         #fig.suptitle(f'Threshold: {threshold}')
-        return fig
+        return fig, target_counter
 
-    def patch(self, restored_obj_list, mask_threshold = 4e-1):
+    def patch(self, restored_obj_history_list, mask_threshold = 4e-1):
         self.output_recon = []
-        for recon_obj in restored_obj_list:
-            # [1, 3, 519, 246]
-            obj = recon_obj.detach().cpu().clone()
-            # [1, 1280, 956]
-            mask = self.pred['masks'][0].detach().cpu().clone()
-            # [1, 519, 246]
-            mask_cropped = mask[:, self.y_min:self.y_max, self.x_min:self.x_max]
-            # [1, 519, 246]
-            binary_mask = (mask_cropped > mask_threshold)[0]
+        outcome_img = self.stylised_image_vector_dummy.clone()
+        for num_epoch in range(len(restored_obj_history_list[0])):
+            for history_idx, obj_idx in zip(range(len(restored_obj_history_list)), self.object_idx):
+                # [1, 3, 519, 246]
+                obj = restored_obj_history_list[history_idx][num_epoch].detach().cpu().clone()
+                # [1, 1280, 956]
+                mask = self.pred['masks'][obj_idx].detach().cpu().clone()
+                # [1, 519, 246]
+                x_min, y_min, x_max, y_max = self.crop_coordinates[history_idx]
+                mask_cropped = mask[:, y_min:y_max, x_min:x_max]
 
-            # [1, 3, 1280, 959]
-            stylised = self.stylised_image_vector_dummy.clone().cpu()
-            # [1, 3, 519, 246]
-            stylised_crop = stylised[:,:, self.y_min:self.y_max, self.x_min:self.x_max]
+                # [1, 519, 246]
+                binary_mask = (mask_cropped > mask_threshold)[0]
 
-            mask_object = obj * binary_mask
-            mask_surrounding = stylised_crop * (binary_mask == False)
-            merged = mask_object + mask_surrounding
+                # [1, 3, 1280, 959]
+                stylised = self.stylised_image_vector_dummy.clone().cpu()
+                # [1, 3, 519, 246]
+                stylised_crop = stylised[:,:, y_min:y_max, x_min:x_max]
 
-            outcome_img = self.stylised_image_vector_dummy.clone()
-            outcome_img[:,:, self.y_min:self.y_max, self.x_min:self.x_max] = merged
+                mask_object = obj * binary_mask
+                mask_surrounding = stylised_crop * (binary_mask == False)
+                merged = mask_object + mask_surrounding
 
-            self.output_recon.append(outcome_img)
+                outcome_img[:,:, y_min:y_max, x_min:x_max] = merged
+                if obj_idx == max(self.object_idx):
+                    self.output_recon.append(outcome_img.clone())
         print('Patching complete')
