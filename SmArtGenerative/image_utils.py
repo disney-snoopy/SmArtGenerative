@@ -3,7 +3,7 @@ import numpy as np
 import PIL.Image
 import matplotlib.pyplot as plt
 import tensorflow as tf
-from tf.keras.preprocessing.image import img_to_array
+from tensorflow.keras.preprocessing.image import img_to_array
 
 def tensor_to_image(tensor):
   '''Converts output tensor back to an image'''
