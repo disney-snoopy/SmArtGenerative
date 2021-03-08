@@ -19,21 +19,23 @@ st.set_option('deprecation.showfileUploaderEncoding', False)
 st.title("SmART Generator")
 st.write("Transform your photos into art using deep learning!")
 
-# dummy variables for if statement
-forward_final = None
-fig = None
 
 @st.cache
-def style_transfer(content_img, style_img):
+def style_transfer(content_img, style_img, style_weight, content_weight):
     model = Transfer(content_img, style_img, n_epochs=1, n_steps=100)
     model.transfer()
     img = tensor_to_image(model.image)
     return img
 
+
 @st.cache
 def load_style_images():
     style_list = load_styles()
     return style_list
+
+
+upload_style_weights = [1e-1, 1e1, 1e4]
+upload_content_weights =[1e8, 1e8, 1e1]
 
 ##### EXAMPLE SLIDESHOW #########
 
@@ -46,6 +48,9 @@ components.html(
     <div id="Examples" class="carousel slide" data-ride="carousel">
       <div class="carousel-inner">
         <div class="carousel-item active">
+          <img class="d-block w-100" src="https://storage.googleapis.com/smartgenerative/style/example-0.png" alt=" Zeroth slide">
+        </div>
+        <div class="carousel-item">
           <img class="d-block w-100" src="https://storage.googleapis.com/smartgenerative/style/example-4.png" alt="First slide">
         </div>
         <div class="carousel-item">
@@ -89,9 +94,20 @@ if content_up is not None:
             style_img = load_uploaded_image(style_up)
 
             weights = st.radio('Preference', ('Style Heavy', 'Balanced', 'Content Heavy'))
+            if weights == 'Style Heavy':
+                style_weight = upload_style_weights[-1]
+                content_weight = upload_content_weights[-1]
+
+            if weights == 'Balanced':
+                style_weight = upload_style_weights[1]
+                content_weight = upload_content_weights[1]
+
+            if weights == 'Content Heavy':
+                style_weight = upload_style_weights[0]
+                content_weight = upload_content_weights[0]
 
             if st.button('Start Transfer'):
-                img = style_transfer(content_img, style_img)
+                img = style_transfer(content_img, style_img, style_weight, content_weight)
                 st.success('Style Transfer Complete!')
                 st.image(img, 'Voila!')
 
@@ -102,25 +118,46 @@ if content_up is not None:
         st.image('https://storage.googleapis.com/smartgenerative/style/style-gallery.png')
         st.image('https://storage.googleapis.com/smartgenerative/style/style-gallery-2.png')
         style_list = load_style_images()
+
         option = st.selectbox('Which style would you like', pics)
-        option = option - 1 #Index starts at 0
+        option = option - 1  #Index starts at 0
+
         'Chosen style:'
-        st.image(style_list[option], STYLES[option])
+        st.image(style_list[option], STYLES[option]['name'])
+
+        weights = st.radio('Preference', ('Style Heavy', 'Balanced', 'Content Heavy'), index=1)
+        if weights == 'Style Heavy':
+            style_weight = STYLES[option]['style'][0]
+            content_weight = STYLES[option]['style'][1]
+
+        if weights == 'Balanced':
+            style_weight = STYLES[option]['balanced'][0]
+            content_weight = STYLES[option]['balanced'][1]
+
+        if weights == 'Content Heavy':
+            style_weight = STYLES[option]['content'][0]
+            content_weight = STYLES[option]['content'][1]
+
         if st.button('Start Transfer'):
             style_img = load_uploaded_image(style_list[option], style=True)
-            img = style_transfer(content_img, style_img)
+            img = style_transfer(content_img, style_img, style_weight, content_weight)
             st.success('Style Transfer Complete!')
             st.image(img, 'Voila!')
 
     if option == 'Surprise me!':
         style_list = load_style_images()
         style = random.choice(style_list)
+        ind = style_list.index(style)
         if st.button('Start Transfer'):
-            style_img = load_uploaded_image(style_list[option], style=True)
-            img = style_transfer(content_img, style_img)
-            st.success('Style Transfer Complete!')
-            st.image(img, 'Voila!')
 
+            ind = style_list.index(style)
+            style_weight = STYLES[ind]['balanced'][0]
+            content_weight = STYLES[ind]['balanced'][1]
+
+            style_img = load_uploaded_image(style, style=True)
+            img = style_transfer(content_img, style_img, style_weight, content_weight)
+            st.success('Style Transfer Complete!')
+            st.image(img, f"Voila! Your image in the style of {STYLES[ind]['name']}")
 
 
 ##### STYLE TRANSFER #########

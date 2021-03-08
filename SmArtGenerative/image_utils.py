@@ -14,27 +14,140 @@ BUCKET_DATA_PATH = 'style/style/'
 
 BASE_URI = 'https://storage.googleapis.com/smartgenerative/'
 
-STYLES = {0:'Alley by the Lake - Leonid Afremov',
-              1: 'Young Waterbearer - Adam Styka',
-              2: 'Sleep Till Spring - David Michael Hinnebusch',
-              3: 'Sunday Afternoon on the Island of La Grande Jatte - Georges Seurat',
-              4: 'Beaute Calme et Volupte - Houria Niati',
-              5: 'Hands Flowers Eyes',
-              6: 'Murnau Street with Women - Wassily Kandinsky',
-              7: 'Political Convergence - Jackson Pollock',
-              8: 'Mona Lisa - Leonardo da Vinci',
-              9: 'The Scream - Edvard Munch',
-              10: 'Creation of Adam - Michelangelo',
-              11: 'Wheatfield with Cypress Tree - Vincent van Gogh',
-              12: 'The Starry Night - Vincent van Gogh',
-              13: 'The Great Wave off Kanagawa - Katsushika Hokusai',
-              14: 'The Last Supper - Leonardo da Vinci',
-              15: 'The Fighting Temeraire - J.M.W. Turner',
-              16: 'The Son of Man - Rene Magritte',
-              17: 'Nighthawks - Edward Hopper',
-              18: 'The New Abnormal - The Stokes',
-              19: 'The Garden - Joan Miro',
-              20: 'Painting (1933) - Joan Miro'
+{
+  'name': 'Painting (1933) - Joan Miro',
+  'style': [1e4, 1e1],
+  'balanced': [1e1, 1e8],
+  'content': [1e-1, 1e8]
+}
+
+
+STYLES = {0: {
+                'name': 'Alley by the Lake - Leonid Afremov',
+                'style': [1e4, 1e1],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+              },
+              1: {
+                'name': 'Young Waterbearer - Adam Styka',
+                'style': [1e4, 1e1],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+              },
+              2: {
+                'name': 'Sleep Till Spring - David Michael Hinnebusch',
+                'style': [1e4, 1e1],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+              },
+              3: {
+                'name': 'Sunday Afternoon on the Island of La Grande Jatte - Georges Seurat',
+                'style': [1e4, 1e1],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+              },
+              4: {
+                'name': 'Beaute Calme et Volupte - Houria Niati',
+                'style': [1e4, 1e1],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+              },
+              5: {
+                'name': 'Hands Flowers Eyes',
+                'style': [1e4, 1e1],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+              },
+              6: {
+                'name': 'Murnau Street with Women - Wassily Kandinsky',
+                'style': [1e4, 1e1],
+                'balanced': [1e3, 1e8],
+                'content': [1e1, 1e8]
+              },
+              7: {
+                'name': 'Political Convergence - Jackson Pollock',
+                'style': [1e4, 1e1],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+              },
+              8: {
+                'name': 'Mona Lisa - Leonardo da Vinci',
+                'style': [1e4, 1e1],
+                'balanced': [1e3, 1e8],
+                'content': [1e1, 1e8]
+              },
+              9: {
+                'name': 'The Scream - Edvard Munch',
+                'style': [1e3, 1e8],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+              },
+              10: {
+                'name': 'Creation of Adam - Michelangelo',
+                'style': [1e4, 1e1],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+              },
+              11: {
+                'name': 'Wheatfield with Cypress Tree - Vincent van Gogh',
+                'style': [1e4, 1e1],
+                'balanced': [1e3, 1e8],
+                'content': [1e1, 1e8]
+              },
+              12: {
+                'name': 'The Starry Night - Vincent van Gogh',
+                'style': [1e4, 1e1],
+                'balanced': [1e3, 1e8],
+                'content': [1e1, 1e8]
+              },
+              13: {
+                'name': 'The Great Wave off Kanagawa - Katsushika Hokusai',
+                'style': [1e4, 1e1],
+                'balanced': [1e3, 1e8],
+                'content': [1e1, 1e8]
+              },
+              14: {
+                'name': 'The Last Supper - Leonardo da Vinci',
+                'style': [1e3, 1e8],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+              },
+              15: {
+                'name': 'The Fighting Temeraire - J.M.W. Turner',
+                'style': [1e2, 1e8],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+              },
+              16: {
+                'name': 'The Son of Man - Rene Magritte',
+                'style': [1e3, 1e8],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+              },
+              17: {
+                'name': 'Nighthawks - Edward Hopper',
+                'style': [1e4, 1e1],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+                },
+              18: {
+                'name': 'The New Abnormal - The Stokes',
+                'style': [1e4, 1e1],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+                },
+              19: {
+                'name': 'The Garden - Joan Miro',
+                'style': [1e4, 1e1],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+                },
+              20: {
+                'name': 'Painting (1933) - Joan Miro',
+                'style': [1e4, 1e1],
+                'balanced': [1e1, 1e8],
+                'content': [1e-1, 1e8]
+                }
               }
 
 def tensor_to_image(tensor):
