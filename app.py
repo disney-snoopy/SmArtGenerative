@@ -1,28 +1,75 @@
 import streamlit as st
+import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
 from SmArtGenerative.utils import loader, unloader
 from SmArtGenerative.trainer_segmentation import TrainerSegmentation
 from SmArtGenerative.params import vgg_model_path, segmentation_model_path
-from SmArtGenerative.image_utils import load_uploaded_image, load_img, tensor_to_image
+from SmArtGenerative.image_utils import load_uploaded_image, load_img, tensor_to_image, load_styles, STYLES
 from SmArtGenerative.transfer_functions import multiple_styles
 from SmArtGenerative.tf_styletransfer import Transfer
 import streamlit.components.v1 as components
+import random
 
 # streamlit setting
 st.set_option('deprecation.showfileUploaderEncoding', False)
 
 # page title
-st.title("SmArt Generative Service")
-st.write("")
+st.title("SmART Generator")
+st.write("Transform your photos into art using deep learning!")
 
 # dummy variables for if statement
 forward_final = None
 fig = None
 
+@st.cache
+def style_transfer(content_img, style_img):
+    model = Transfer(content_img, style_img, n_epochs=1, n_steps=100)
+    model.transfer()
+    img = tensor_to_image(model.image)
+    return img
 
-##### OMER UPLOAD OPTIONS #########
+@st.cache
+def load_style_images():
+    style_list = load_styles()
+    return style_list
+
+##### EXAMPLE SLIDESHOW #########
+
+components.html(
+    """
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <div id="Examples" class="carousel slide" data-ride="carousel">
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <img class="d-block w-100" src="https://storage.googleapis.com/smartgenerative/style/example-4.png" alt="First slide">
+        </div>
+        <div class="carousel-item">
+          <img class="d-block w-100" src="https://storage.googleapis.com/smartgenerative/style/example-2.png" alt="Second slide">
+        </div>
+        <div class="carousel-item">
+          <img class="d-block w-100" src="https://storage.googleapis.com/smartgenerative/style/example-3.png" alt="Third slide">
+        </div>
+        <div class="carousel-item">
+          <img class="d-block w-100" src="https://storage.googleapis.com/smartgenerative/style/example-1.png" alt="Fourth slide">
+        </div>
+      </div>
+    </div>
+    <style>
+      .carousel-item img {
+        max-width: 100%;
+        max-height: 100%;
+      }
+    </style>
+    """,
+    height=425, width=700,
+)
+
+##### STYLE TRANSFER #########
 
 content_up = st.file_uploader("Upload an image:", type=['png', 'jpg', 'jpeg'])
 
@@ -34,7 +81,7 @@ if content_up is not None:
                 'Choose a style from the gallery',
                 'Surprise me!']
 
-    option = st.selectbox('Pick a style option', options)
+    option = st.radio('Pick a style option', options)
     if option == 'I want to upload my own style image':
         style_up = st.file_uploader("Upload the image to transfer style from", type=['png', 'jpg', 'jpeg'])
 
@@ -43,21 +90,37 @@ if content_up is not None:
 
             weights = st.radio('Preference', ('Style Heavy', 'Balanced', 'Content Heavy'))
 
-            model = Transfer(content_img, style_img, n_epochs=1)
-            model.transfer()
-            img = tensor_to_image(model.image)
-            st.image(img, 'Voila')
+            if st.button('Start Transfer'):
+                img = style_transfer(content_img, style_img)
+                st.success('Style Transfer Complete!')
+                st.image(img, 'Voila!')
 
     if option == 'Choose a style from the gallery':
 
-        pics = [x for x in range(1,21)]
+        pics = [x for x in range(1,22)]
         st.write('You can pick from the following styles:')
         st.image('https://storage.googleapis.com/smartgenerative/style/style-gallery.png')
         st.image('https://storage.googleapis.com/smartgenerative/style/style-gallery-2.png')
+        style_list = load_style_images()
         option = st.selectbox('Which style would you like', pics)
+        option = option - 1 #Index starts at 0
+        'Chosen style:'
+        st.image(style_list[option], STYLES[option])
+        if st.button('Start Transfer'):
+            style_img = load_uploaded_image(style_list[option], style=True)
+            img = style_transfer(content_img, style_img)
+            st.success('Style Transfer Complete!')
+            st.image(img, 'Voila!')
 
     if option == 'Surprise me!':
-        pass
+        style_list = load_style_images()
+        style = random.choice(style_list)
+        if st.button('Start Transfer'):
+            style_img = load_uploaded_image(style_list[option], style=True)
+            img = style_transfer(content_img, style_img)
+            st.success('Style Transfer Complete!')
+            st.image(img, 'Voila!')
 
-##### OMER UPLOAD OPTIONS #########
 
+
+##### STYLE TRANSFER #########
