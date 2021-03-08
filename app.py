@@ -22,7 +22,7 @@ st.write("Transform your photos into art using deep learning!")
 
 @st.cache
 def style_transfer(content_img, style_img, style_weight, content_weight):
-    model = Transfer(content_img, style_img, n_epochs=1, n_steps=100)
+    model = Transfer(content_img, style_img, n_epochs=1, n_steps=3)
     model.transfer()
     img = tensor_to_image(model.image)
     return img
@@ -32,6 +32,13 @@ def style_transfer(content_img, style_img, style_weight, content_weight):
 def load_style_images():
     style_list = load_styles()
     return style_list
+
+
+@st.cache
+def random_image():
+    style_list = load_style_images()
+    style = random.choice(style_list)
+    return style
 
 
 upload_style_weights = [1e-1, 1e1, 1e4]
@@ -124,6 +131,7 @@ if content_up is not None:
 
         'Chosen style:'
         st.image(style_list[option], STYLES[option]['name'])
+        style_img = load_uploaded_image(style_list[option], style=True)
 
         weights = st.radio('Preference', ('Style Heavy', 'Balanced', 'Content Heavy'), index=1)
         if weights == 'Style Heavy':
@@ -139,25 +147,30 @@ if content_up is not None:
             content_weight = STYLES[option]['content'][1]
 
         if st.button('Start Transfer'):
-            style_img = load_uploaded_image(style_list[option], style=True)
             img = style_transfer(content_img, style_img, style_weight, content_weight)
             st.success('Style Transfer Complete!')
             st.image(img, 'Voila!')
 
     if option == 'Surprise me!':
         style_list = load_style_images()
-        style = random.choice(style_list)
+        # style = random.choice(style_list)
+        style = random_image()
+
         ind = style_list.index(style)
+        style_weight = STYLES[ind]['balanced'][0]
+        content_weight = STYLES[ind]['balanced'][1]
+
+        style_img = load_uploaded_image(style, style=True)
         if st.button('Start Transfer'):
-
-            ind = style_list.index(style)
-            style_weight = STYLES[ind]['balanced'][0]
-            content_weight = STYLES[ind]['balanced'][1]
-
-            style_img = load_uploaded_image(style, style=True)
             img = style_transfer(content_img, style_img, style_weight, content_weight)
             st.success('Style Transfer Complete!')
             st.image(img, f"Voila! Your image in the style of {STYLES[ind]['name']}")
+
+
+test = st.radio('Cache', ('Option 1', 'Option 2'))
+if test == 'Option 2':
+    img = style_transfer(content_img, style_img, style_weight, content_weight)
+    st.image(img)
 
 
 ##### STYLE TRANSFER #########
