@@ -2,15 +2,17 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
-import torchvision.transforms as T
-from SmArtGenerative.utils import loader, unloader
-from SmArtGenerative.trainer_segmentation import TrainerSegmentation
-from SmArtGenerative.params import vgg_model_path, segmentation_model_path
+# import torchvision.transforms as T
+# from SmArtGenerative.utils import loader, unloader
+# from SmArtGenerative.trainer_segmentation import TrainerSegmentation
+# from SmArtGenerative.params import vgg_model_path, segmentation_model_path
 from SmArtGenerative.image_utils import load_uploaded_image, load_img, tensor_to_image, load_styles, STYLES
 from SmArtGenerative.transfer_functions import multiple_styles
 from SmArtGenerative.tf_styletransfer import Transfer
 import streamlit.components.v1 as components
 import random
+from contextlib import contextmanager, redirect_stdout
+from io import StringIO
 
 # streamlit setting
 st.set_option('deprecation.showfileUploaderEncoding', False)
@@ -22,10 +24,13 @@ st.write("Transform your photos into art using deep learning!")
 
 @st.cache
 def style_transfer(content_img, style_img, style_weight, content_weight):
-    model = Transfer(content_img, style_img, n_epochs=1, n_steps=3)
+    model = Transfer(content_img, style_img,
+                     style_weight=style_weight, content_weight=content_weight,
+                     n_epochs=8, n_steps=100, store_iter=True)
     model.transfer()
     img = tensor_to_image(model.image)
-    return img
+    # img_list = [np.squeeze(np.array(x)) for x in model.img_list]
+    return img  # , img_list
 
 
 @st.cache
@@ -42,7 +47,22 @@ def random_image():
 
 
 upload_style_weights = [1e-1, 1e1, 1e4]
-upload_content_weights =[1e8, 1e8, 1e1]
+upload_content_weights = [1e8, 1e8, 1e1]
+
+
+@contextmanager
+def st_capture(output_func):
+    with StringIO() as stdout, redirect_stdout(stdout):
+        old_write = stdout.write
+
+        def new_write(string):
+            ret = old_write(string)
+            output_func(stdout.getvalue())
+            return ret
+
+        stdout.write = new_write
+        yield
+
 
 ##### EXAMPLE SLIDESHOW #########
 
@@ -90,8 +110,8 @@ if content_up is not None:
     content_img = load_uploaded_image(content_up)
 
     options = ['I want to upload my own style image',
-                'Choose a style from the gallery',
-                'Surprise me!']
+               'Choose a style from the gallery',
+               'Surprise me!']
 
     option = st.radio('Pick a style option', options)
     if option == 'I want to upload my own style image':
@@ -114,7 +134,11 @@ if content_up is not None:
                 content_weight = upload_content_weights[0]
 
             if st.button('Start Transfer'):
-                img = style_transfer(content_img, style_img, style_weight, content_weight)
+
+                output = st.empty()
+                with st_capture(output.code):
+                    img = style_transfer(content_img, style_img, style_weight, content_weight)
+
                 st.success('Style Transfer Complete!')
                 st.image(img, 'Voila!')
 
@@ -127,7 +151,7 @@ if content_up is not None:
         style_list = load_style_images()
 
         option = st.selectbox('Which style would you like', pics)
-        option = option - 1  #Index starts at 0
+        option = option - 1  # Index starts at 0
 
         'Chosen style:'
         st.image(style_list[option], STYLES[option]['name'])
@@ -147,7 +171,11 @@ if content_up is not None:
             content_weight = STYLES[option]['content'][1]
 
         if st.button('Start Transfer'):
-            img = style_transfer(content_img, style_img, style_weight, content_weight)
+
+            output = st.empty()
+            with st_capture(output.code):
+                img = style_transfer(content_img, style_img, style_weight, content_weight)
+
             st.success('Style Transfer Complete!')
             st.image(img, 'Voila!')
 
@@ -162,15 +190,12 @@ if content_up is not None:
 
         style_img = load_uploaded_image(style, style=True)
         if st.button('Start Transfer'):
-            img = style_transfer(content_img, style_img, style_weight, content_weight)
+
+            output = st.empty()
+            with st_capture(output.code):
+                img = style_transfer(content_img, style_img, style_weight, content_weight)
+
             st.success('Style Transfer Complete!')
             st.image(img, f"Voila! Your image in the style of {STYLES[ind]['name']}")
-
-
-test = st.radio('Cache', ('Option 1', 'Option 2'))
-if test == 'Option 2':
-    img = style_transfer(content_img, style_img, style_weight, content_weight)
-    st.image(img)
-
 
 ##### STYLE TRANSFER #########
