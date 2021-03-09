@@ -214,7 +214,7 @@ def load_styles_local():
   path = os.path.join(os.path.dirname(__file__),'data/style')
   imagesList = sorted(os.listdir(path))
   loadedImages = []
-  for image in imagesList[1:]:
+  for image in imagesList:
     img = PIL.Image.open(path + '/' + image)
     loadedImages.append(img)
 
