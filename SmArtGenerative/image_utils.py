@@ -14,13 +14,6 @@ BUCKET_DATA_PATH = 'style/style/'
 
 BASE_URI = 'https://storage.googleapis.com/smartgenerative/'
 
-{
-  'name': 'Painting (1933) - Joan Miro',
-  'style': [1e4, 1e1],
-  'balanced': [1e1, 1e8],
-  'content': [1e-1, 1e8]
-}
-
 
 STYLES = {0: {
                 'name': 'Alley by the Lake - Leonid Afremov',
@@ -131,7 +124,7 @@ STYLES = {0: {
                 'content': [1e-1, 1e8]
                 },
               18: {
-                'name': 'The New Abnormal - The Stokes',
+                'name': 'The New Abnormal - The Strokes',
                 'style': [1e4, 1e1],
                 'balanced': [1e1, 1e8],
                 'content': [1e-1, 1e8]
@@ -194,7 +187,16 @@ def load_uploaded_image(image, style=False):
   img = img[tf.newaxis, :]
   return img
 
+# def get_credentials():
+#     credentials_raw = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+#     if '.json' in credentials_raw:
+#         credentials_raw = open(credentials_raw).read()
+#     creds_json = json.loads(credentials_raw)
+#     creds_gcp = service_account.Credentials.from_service_account_info(creds_json)
+#     return creds_gcp
+
 def load_styles():
+  #credentials = get_credentials()
   images = []
   client = storage.Client()
   bucket = client.bucket(BUCKET_NAME)
@@ -206,6 +208,17 @@ def load_styles():
     img = PIL.Image.open(BytesIO(response.content))
     images.append(img)
   return images
+
+def load_styles_local():
+  # return array of images
+  path = os.path.join(os.path.dirname(__file__),'data/style')
+  imagesList = sorted(os.listdir(path))
+  loadedImages = []
+  for image in imagesList[1:]:
+    img = PIL.Image.open(path + '/' + image)
+    loadedImages.append(img)
+
+  return loadedImages
 
 def imshow(image, title=None):
   if len(image.shape) > 3:

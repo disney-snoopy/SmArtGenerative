@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # from SmArtGenerative.utils import loader, unloader
 # from SmArtGenerative.trainer_segmentation import TrainerSegmentation
 # from SmArtGenerative.params import vgg_model_path, segmentation_model_path
-from SmArtGenerative.image_utils import load_uploaded_image, load_img, tensor_to_image, load_styles, STYLES
+from SmArtGenerative.image_utils import load_uploaded_image, load_img, tensor_to_image, load_styles, load_styles_local, STYLES
 from SmArtGenerative.transfer_functions import multiple_styles
 from SmArtGenerative.tf_styletransfer import Transfer
 import streamlit.components.v1 as components
@@ -35,7 +35,7 @@ def style_transfer(content_img, style_img, style_weight, content_weight):
 
 @st.cache
 def load_style_images():
-    style_list = load_styles()
+    style_list = load_styles_local()
     return style_list
 
 
@@ -135,9 +135,9 @@ if content_up is not None:
 
             if st.button('Start Transfer'):
 
-                output = st.empty()
-                with st_capture(output.code):
-                    img = style_transfer(content_img, style_img, style_weight, content_weight)
+                # output = st.empty()
+                # with st_capture(output.code):
+                img = style_transfer(content_img, style_img, style_weight, content_weight)
 
                 st.success('Style Transfer Complete!')
                 st.image(img, 'Voila!')
@@ -172,9 +172,9 @@ if content_up is not None:
 
         if st.button('Start Transfer'):
 
-            output = st.empty()
-            with st_capture(output.code):
-                img = style_transfer(content_img, style_img, style_weight, content_weight)
+            # output = st.empty()
+            # with st_capture(output.code):
+            img = style_transfer(content_img, style_img, style_weight, content_weight)
 
             st.success('Style Transfer Complete!')
             st.image(img, 'Voila!')
@@ -191,10 +191,7 @@ if content_up is not None:
         style_img = load_uploaded_image(style, style=True)
         if st.button('Start Transfer'):
 
-            output = st.empty()
-            with st_capture(output.code):
-                img = style_transfer(content_img, style_img, style_weight, content_weight)
-
+            img = style_transfer(content_img, style_img, style_weight, content_weight)
             st.success('Style Transfer Complete!')
             st.image(img, f"Voila! Your image in the style of {STYLES[ind]['name']}")
 

@@ -13,8 +13,8 @@ pandas
 scikit-learn
 
 # deep learning frameworks
-torch
-torchvision
+# torch
+# torchvision
 tensorflow
 
 # tests/linter
@@ -38,3 +38,5 @@ jupyter
 tqdm
 imageio
 streamlit
+python-dotenv
+google

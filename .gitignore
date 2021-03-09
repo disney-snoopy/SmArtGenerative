@@ -6,3 +6,4 @@ raw_data/
 **/__pycache__/
 .env
 pretrained_models/
+SmArtGenerative-42cd44bc1ded.json
