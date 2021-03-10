@@ -26,11 +26,11 @@ st.write("Transform your photos into art using deep learning!")
 def style_transfer(content_img, style_img, style_weight, content_weight):
     model = Transfer(content_img, style_img,
                      style_weight=style_weight, content_weight=content_weight,
-                     n_epochs=8, n_steps=100, store_iter=True)
+                     n_epochs=50, n_steps=10, store_iter=True)
     model.transfer()
     img = tensor_to_image(model.image)
-    # img_list = [np.squeeze(np.array(x)) for x in model.img_list]
-    return img  # , img_list
+    img_list = [tensor_to_image(x) for x in model.img_list]
+    return img, img_list
 
 
 @st.cache
@@ -137,9 +137,11 @@ if content_up is not None:
 
                 # output = st.empty()
                 # with st_capture(output.code):
-                img = style_transfer(content_img, style_img, style_weight, content_weight)
 
+                img, img_list = style_transfer(content_img, style_img, style_weight, content_weight)
+                img.save('out.gif', save_all=True, append_images=img_list, loop=0)
                 st.success('Style Transfer Complete!')
+                st.image('out.gif')
                 st.image(img, 'Voila!')
 
     if option == 'Choose a style from the gallery':
@@ -174,9 +176,10 @@ if content_up is not None:
 
             # output = st.empty()
             # with st_capture(output.code):
-            img = style_transfer(content_img, style_img, style_weight, content_weight)
-
+            img, img_list = style_transfer(content_img, style_img, style_weight, content_weight)
+            img.save('out.gif', save_all=True, append_images=img_list, loop=0)
             st.success('Style Transfer Complete!')
+            st.image('out.gif')
             st.image(img, 'Voila!')
 
     if option == 'Surprise me!':
@@ -191,8 +194,10 @@ if content_up is not None:
         style_img = load_uploaded_image(style, style=True)
         if st.button('Start Transfer'):
 
-            img = style_transfer(content_img, style_img, style_weight, content_weight)
+            img, img_list = style_transfer(content_img, style_img, style_weight, content_weight)
+            img.save('out.gif', save_all=True, append_images=img_list, loop=0)
             st.success('Style Transfer Complete!')
+            st.image('out.gif')
             st.image(img, f"Voila! Your image in the style of {STYLES[ind]['name']}")
 
 ##### STYLE TRANSFER #########
