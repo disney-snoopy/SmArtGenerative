@@ -17,9 +17,28 @@ from io import StringIO
 # streamlit setting
 st.set_option('deprecation.showfileUploaderEncoding', False)
 
+st.sidebar.title("How it works")
+st.sidebar.info(
+    "**SmART** takes your pictures and **transforms** them to an artistic style of your choosing! 👨‍🎨👩‍🎨"
+    "\n\nFirst upload a picture, then you can choose between **uploading your own style picture** as well, "
+    "**choosing a style from our gallery** or letting us choose for you with the **surprise me** option 🙈\n\n"
+    "You can also choose between **Style Heavy**(like a painting), **Balanced**(somwhere in the middle) and "
+    "**Content Heavy**(like a filter) "
+)
+st.sidebar.title("About")
+st.sidebar.info(
+    """
+    This app was developed by **Edward Touche**, **Jae Kim**, **Omer Aziz** and **Peter Stanley**.
+    You can view the source code
+    [here](https://github.com/disney-snoopy/SmArtGenerative).
+"""
+)
+
+st.set_option('deprecation.showfileUploaderEncoding', False)
+
 # page title
-st.title("SmART Generator")
-st.write("Transform your photos into art using deep learning!")
+st.image('https://storage.googleapis.com/smartgenerative/style/SmArt%20style%20transfer%20(2).png', use_column_width=True)
+st.title("Transform your photos into art using deep learning! 🖼")
 
 
 @st.cache
