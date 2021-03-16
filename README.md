@@ -1,74 +1,44 @@
-# Data analysis
-- Document here the project: SmArtGenerative
-- Description: Project Description
-- Data Source:
-- Type of analysis:
+![SmART](https://storage.googleapis.com/smartgenerative/style/SmArt%20style%20transfer%20(2).png)
 
-Please document the project the better you can.
+## Convert your pictures to art using Neural Style Transfer! 
 
-# Startup the project
+![Example](https://storage.googleapis.com/smartgenerative/style/example-trees.png)
 
-The initial setup.
+## Usage
+  - [Google Colab](#google-colab)
+  - [Streamlit](#streamlit)
 
-Create virtualenv and install the project:
-```bash
-sudo apt-get install virtualenv python-pip python-dev
-deactivate; virtualenv ~/venv ; source ~/venv/bin/activate ;\
-    pip install pip -U; pip install -r requirements.txt
-```
+# Google Colab 
+Running the neural style requires a lot of computational power and therefore the most efficient way to run it is using a **GPU through Google Colaboratory** 
 
-Unittest test:
-```bash
-make clean install test
-```
+### 1. Open the notebook in Google Colab
 
-Check for SmArtGenerative in gitlab.com/{group}.
-If your project is not set please add it:
+You can access the style transfer notebook [here](https://colab.research.google.com/github/disney-snoopy/SmArtGenerative/blob/master/notebooks/style_transfer_tf.ipynb)
 
-- Create a new project on `gitlab.com/{group}/SmArtGenerative`
-- Then populate it:
+
+# Streamlit 
+
+## Installation
+
+- Clone this repo
 
 ```bash
-##   e.g. if group is "{group}" and project_name is "SmArtGenerative"
-git remote add origin git@github.com:{group}/SmArtGenerative.git
-git push -u origin master
-git push -u origin --tags
-```
-
-Functionnal test with a script:
-
-```bash
-cd
-mkdir tmp
-cd tmp
-SmArtGenerative-run
-```
-
-# Install
-
-Go to `https://github.com/{group}/SmArtGenerative` to see the project, manage issues,
-setup you ssh public key, ...
-
-Create a python3 virtualenv and activate it:
-
-```bash
-sudo apt-get install virtualenv python-pip python-dev
-deactivate; virtualenv -ppython3 ~/venv ; source ~/venv/bin/activate
-```
-
-Clone the project and install it:
-
-```bash
-git clone git@github.com:{group}/SmArtGenerative.git
+git clone https://github.com/disney-snoopy/SmArtGenerative
 cd SmArtGenerative
-pip install -r requirements.txt
-make clean install test                # install and test
 ```
-Functionnal test with a script:
+- Install the requirements
 
 ```bash
-cd
-mkdir tmp
-cd tmp
-SmArtGenerative-run
+pip install -r requirements.txt
 ```
+
+## Run Streamlit 
+
+You should be able to run the streamlit version of this app using 
+
+```bash
+streamlit run app.py
+```
+
+
+
