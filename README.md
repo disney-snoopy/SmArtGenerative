@@ -15,7 +15,7 @@ Running the neural style requires a lot of computational power and therefore the
 
 ### 1. Open the notebook in Google Colab
 
-You can access the style transfer notebook **[here](https://colab.research.google.com/github/disney-snoopy/SmArtGenerative/blob/master/style_transfer_demo.ipynb)**
+You can access the style transfer notebook **[here](https://colab.research.google.com/github/disney-snoopy/SmArtGenerative/blob/master/notebooks/style_transfer_demo.ipynb)**
 
 ### 2. Switch to a GPU Runtime 
 
