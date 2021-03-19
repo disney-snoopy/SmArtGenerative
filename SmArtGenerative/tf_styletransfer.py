@@ -143,7 +143,7 @@ class Transfer():
       if self.store_iter:
         self.img_list.append(tf.convert_to_tensor(self.image))
 
-      # display.clear_output(wait=True)
+      display.clear_output(wait=True)
       if self.show_image:
         display.display(tensor_to_image(self.image))
       print("\nIterations: {}".format(step))
