@@ -5,9 +5,9 @@
 ![Example](https://storage.googleapis.com/smartgenerative/style/example-trees.png)
 
 ## Project Members
-Jae Kim
-Omer Aziz
-Peter Stanley
+Jae Kim,
+Omer Aziz,
+Peter Stanley,
 Edward Touche
 
 ## Usage
