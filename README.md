@@ -27,6 +27,7 @@ You can access the style transfer notebook **[here](https://colab.research.googl
 
 ### 4. Follow the instructions in the notebook
 
+
 # Streamlit 
 
 You can also run the streamlit application on your own computer. **This could take up to 30 minutes** depending on the specs of your computer
